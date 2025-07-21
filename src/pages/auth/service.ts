@@ -14,9 +14,10 @@ export const singUp = async (bodyUser: User) => {
   return response.data;
 };
 
-export const LogIn = async (bodyLogin: Login, remember: boolean) => {
+export const LogIn = async (bodyLogin: Login) => {
   const url = `${URL_AUTH}/login`;
-  const response = await client.post<LoginResponse>(url, bodyLogin);
+  const { remember,email,password } = bodyLogin  
+  const response = await client.post<LoginResponse>(url, {email,password});
     const { accessToken } = response.data;
     if (remember) {
       storage.set("auth", accessToken);

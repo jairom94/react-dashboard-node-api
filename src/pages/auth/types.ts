@@ -5,7 +5,14 @@ export interface User {
   password: string;
 }
 
-export type Login = Omit<User, "name" | "username">;
+export interface Login extends Omit<User, "name" | "username">{
+  remember:boolean;
+  [key: string]:string | boolean
+};
+
+export type LoginClean = {  
+  [P in keyof Omit<Login, 'remember'>]: string; 
+};
 
 export interface LoginResponse {
   accessToken: string;

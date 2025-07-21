@@ -2,7 +2,7 @@ import type { Advert, FilterByAdverts } from "../pages/adverts/types";
 
 export default {
     filterAdverts(adverts:Advert[],rawFilters:FilterByAdverts){
-        console.log(rawFilters);
+        // console.log(rawFilters);
         
         return adverts.filter((advert)=>{
             const testFilters = []
