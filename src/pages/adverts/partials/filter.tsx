@@ -1,49 +1,52 @@
-import { useState, type ChangeEvent } from "react";
-import type { FilterByAdverts, RadioType } from "../types";
+import { type ChangeEvent } from "react";
+import type { FilterByAdverts, FiltersKey, FiltersTypeValues } from "../types";
 import TagsSelected from "../../../components/tags/tags-selected";
 
 interface FilterProps {
-  filters: FilterByAdverts;
-  addTagToFilters: (tag: string) => void;
-  removeTagFromFIlters: (tag: string) => void;
+  filters: FilterByAdverts;  
   showByCategory: string;
-  onChangeTypeFilters: (type: string) => void;
-  onChangeName: (name: string) => void;
+  onChange:(key:FiltersKey,value:FiltersTypeValues,toRemove?:boolean)=>void;  
 }
 const Filter = ({
-  filters,
-  addTagToFilters,
-  removeTagFromFIlters,
+  filters,  
   showByCategory,
-  onChangeTypeFilters: changeTypeFilters,
-  onChangeName: changeName,
+  onChange  
 }: FilterProps) => {  
-  const [typesAdvert, setTypesAdverts] = useState<RadioType[]>([
-    { value: "compra", state: false },
-    { value: "venta", state: false },
-    { value: "todos", state: true },
-  ]);
+
+  const typesAdvert = ['compra','venta','todos']
+
+  // const [sale,setSale] = useState<boolean|undefined>()
+  const { sale } = filters
+
+  const saleSelected = sale === true 
+  ? 'venta' 
+  : sale === false ? 'compra' : 'todos'
+
   const { tags } = filters
   
-  function handleChangeTags(tag:string) {
-    addTagToFilters(tag);   
+  function handleChangeTags(tag:string) {      
+    onChange('tags',tag) 
   }  
   function handleRemoveTagSelected(tag:string) {       
-    removeTagFromFIlters(tag)
+    onChange('tags',tag,true)    
   }
   function handleChangeType(e: ChangeEvent<HTMLInputElement>) {    
-    changeTypeFilters(e.target.value);
-    let temp = typesAdvert.map((ta) => {
-      if (ta.value === e.target.value) {
-        return { ...ta, state: true };
-      }
-      return { ...ta, state: false };
-    });
-    setTypesAdverts(temp);
-    temp = [];
+    const [compra,venta] = typesAdvert
+    switch (e.target.value) {
+      case compra:        
+        onChange('sale',false)
+        break;
+      case venta:
+        onChange('sale',true)        
+        break;
+      default:
+        onChange('sale',undefined)        
+        break;
+    }
+
   }
   function handleChangeName(e: ChangeEvent<HTMLInputElement>) {    
-    changeName(e.target.value);
+    onChange('name',e.target.value)
   }
   return (
     <div className="flex flex-col gap-5 p-3 md:sticky md:top-[var(--h-header-md)] md:left-0 md:self-start [&>div]:flex [&>div]:flex-col">
@@ -71,18 +74,18 @@ const Filter = ({
         <div className="flex flex-col gap-2 [&>label]:cursor-pointer [&>label]:text-emerald-600 [&>label]:transition-colors [&>label]:duration-300 [&>label]:has-checked:font-medium [&>label]:has-checked:text-emerald-800 [&>label>input]:cursor-pointer">
           { typesAdvert.map(typeAdvert => (
             <label 
-            key={typeAdvert.value}
+            key={typeAdvert}
             className="grid grid-cols-[40px_1fr]" 
-            htmlFor={typeAdvert.value}>
+            htmlFor={typeAdvert}>
             <input
-              checked={typeAdvert.state}
+              checked={typeAdvert === saleSelected}
               onChange={handleChangeType}
               type="radio"
               name="sale"
-              value={typeAdvert.value}
-              id={typeAdvert.value}
+              value={typeAdvert}
+              id={typeAdvert}
             />
-            <span>{`${typeAdvert.value.slice(0,1).toUpperCase()}${typeAdvert.value.slice(1)}`}</span>
+            <span>{`${typeAdvert.slice(0,1).toUpperCase()}${typeAdvert.slice(1)}`}</span>
           </label>
           )) }          
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Advert, FilterByAdverts } from "./types";
+import type { Advert, FilterByAdverts, FiltersKey, FiltersTypeValues } from "./types";
 import AdvertItem from "./partials/advert-item";
 import { getAdverts } from "./service";
 import manage from "../../utils/manage";
@@ -12,11 +12,10 @@ import BreadCrumbs from "./partials/bread-crumbs";
 const AdvertsPage = () => {
   const [adverts, setAdverts] = useState<Advert[]>([]);  
   const [filters, setFilters] = useState<FilterByAdverts>({
-    name: "",
-    type: "",
+    name: "",    
     tags: [],
-  });  
-
+  });    
+  
   const [searchParams] = useSearchParams();
   const searchByCategory = searchParams.get("category") ?? "";
 
@@ -33,31 +32,42 @@ const AdvertsPage = () => {
   function handleDeleteAdvert(advertId: string) {
     const newAdverts = adverts.filter(({ id }) => id !== advertId);
     setAdverts(newAdverts);
-  }  
-  function changeName(name: string) {
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      name,
-    }));
-  }
-  function changeTypeFilters(type:string){
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      type,
-    }));
-  }
-  function addTagToFilters(tag:string){
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      tags: [...filters.tags, tag],
-    }));
-  }
-  function removeTagFromFIlters(tag:string){
-    const temp = [...filters.tags.filter((t) => t !== tag)];
-    setFilters((prevFilters) => ({
-      ...prevFilters,
-      tags: temp,
-    }));
+  }      
+
+  function handleChange(key:FiltersKey,value:FiltersTypeValues,toRemove=false){
+    if(toRemove && key === 'tags'){      
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        [key]: [...filters.tags.filter((t) => t !== value as string)],
+      }));
+    }else{
+      switch (key) {
+        case 'name':
+          setFilters((prevFilters) => ({
+            ...prevFilters,
+            [key]:value as string,
+          }));
+          break;
+        case 'tags':
+          setFilters((prevFilters) => ({
+            ...prevFilters,
+            [key]: [...filters.tags, value as string],
+          }));
+          break;
+        case 'sale':
+          setFilters((prevFilters) => {
+            if(value === undefined){
+              const update = {...prevFilters}
+              delete update.sale
+              return update 
+            }
+            return {...prevFilters,[key]:value as boolean}
+          });
+          break;
+        default:
+          break;
+      }
+    }
   }
   return (
     <div className="m-[0_auto] max-w-[90dvw] py-5 md:grid md:max-w-[100dvw] md:grid-cols-[minmax(350px,350px)_1fr]">
@@ -67,15 +77,13 @@ const AdvertsPage = () => {
         <BreadCrumbs  searchByCategory={searchByCategory} />
       </div>
 
-      {/* Filtrado */}     
-      <Filter 
-      filters={filters} 
-      onChangeName={changeName} 
-      onChangeTypeFilters={changeTypeFilters}
-      showByCategory={searchByCategory}
-      addTagToFilters={addTagToFilters}
-      removeTagFromFIlters={removeTagFromFIlters}
-      />
+      {/* Filtrado */}           
+        <Filter 
+        filters={filters}         
+        onChange={handleChange}
+        showByCategory={searchByCategory}
+        // removeTagFromFIlters={removeTagFromFIlters}
+        />      
       <ul
         className={`grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-[minmax(280px,_1fr)_minmax(280px,_1fr)_minmax(280px,_1fr)_minmax(280px,_1fr)] md:px-2`}
       >
